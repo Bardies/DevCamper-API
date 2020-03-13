@@ -1,4 +1,4 @@
-
+//  MONGOOSE >> PACKAGE/TOOL/LIBRARY TO INTRACT WITH MONGOO DB IN JS CODE
 const mongoose = require('mongoose');
 
 const connect_db = async () => {

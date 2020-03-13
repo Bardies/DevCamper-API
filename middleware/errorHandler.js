@@ -7,7 +7,7 @@
 const errorHandler = (err, req, res, next) => {
     //FOR DEVELOPMENT ..
     console.log(err.stack);
-    //RESPONSE
+    //VALID RESPONSE TO THE USER (FRONT END) AND HTTP STATUS CODE
     res.status(err.statusCode).json({
         success: false,
         Error: err.message

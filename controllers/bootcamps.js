@@ -32,11 +32,16 @@ exports.getBootcamp = async (req, res, next) => {
         */
         if (!bootcamp) {
             //RETURN TO ENSURE NOT EXECUTING THE RES.STATUS(200) AFTER THIS PART OF CODE
+
             //return res.status(400).json({ success: false })
+
             /* By using error handler in NODE JS
-                the difference between this line and the one in catch is 
-                 in this line the id is the same format but no bootcamp exist with this id
-                 in catch the id format is incorrect so the code won't search for this id but catch error immediately
+                >> the difference between this line and the one in catch is 
+                    in this line the id is the same format but no bootcamp exist with this id
+                    in catch the id format is incorrect so the code won't search for this id but catch error immediately
+            */
+            /* CREATE INSTANCE OF THE CLASS ERRORRES AND SEND MSG, STUTUS CODE TO RUN THE CONSTRUCTOR
+                    ####### HOW THIS ERROR WILL APPEAR IN THE RESPONSE ??
             */
 
             next(new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404))
@@ -49,10 +54,15 @@ exports.getBootcamp = async (req, res, next) => {
 
 
     } catch (err) {
-        //res.status(400).json({ success: false })
 
-        //ERROR HANDLING IN NODE JS
-        //next(err)
+        // 1- res.status(400).json({ success: false })
+
+        /*Default error handler in "EXPRESS"
+                    
+            For errors returned from asynchronous functions invoked by route handlers and middleware
+            you must pass them to the next() function, where Express will catch and process them
+        */
+        //2- next(err)
 
         //HADLE THE ERROR USING THE CLASS
         next(new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404));
@@ -124,7 +134,8 @@ exports.updateBootcamp = async (req, res, next) => {
 /*
  (module is discrete program in single file)
  module object representing the current module (meta data about module like id and file name)
- to use the functions existed in this model in another model we use module.exports == exports
- here there are more than one function so we require the whole file in other modules
+ to use the functions existed in this module in another module we use module.exports =~ exports
+ here there are more than one function so use this way (exports.function)
+ sigle function/class > module.exports = func_name/class
 
 */

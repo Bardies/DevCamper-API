@@ -1,7 +1,9 @@
 const express = require('express');
+//load env. vars from .env file into process.env(process> global obj., env> prop. returns obj. contains the user environment)
 const dotenv = require('dotenv');
 const app = express();
-const morgan = require('morgan');
+//Middleware for logging in NODEJS
+//const morgan = require('morgan');
 //const logger = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler')
 const connect_db = require('./config/db')
@@ -23,16 +25,32 @@ const bootcamps_router = require('./routes/bootcamps');
     3- this function in controller file will has the response                   >> controllers
 
 */
+/*
+    MIDDLEWARE >> FUNCTIONS CALLED BETWEEN PROCESSING REQUEST AND SENDING RESPONSE
+    express.json >> used in POST & PUT requests >> in those methods we send data to the server (data enclosed in the body)
+    and the server will extract that data from the body of request
+    Express provides middleware to deal with this data >> express.json & express.urlencooded and we can use it as middleware by 
+    calling inside app.use()
+    express.json >> method built in express to recognize the incoming data as JSON OBJECT
+    express.urlencoded >> method built in express to recognize the incoming data as string or array
+
+*/
 // dev logger (Middleware for logging in NODEJS)
-if (process.env.NODE_ENV === 'development') {
+/*if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
-}
+}*/
 
 //ENABLE US TO PARSE THE BODY
 app.use(express.json());
+
 //Routes 
 app.use('/api/v1/bootcamps', bootcamps_router);
-//Order in Middleware is important, linear in execution of middleware
+
+/*Order in Middleware is important, linear in execution of middleware
+    >> You define error-handling middleware last, after other app.use() and routes calls
+
+this is a custom error handler function if it isn't exist the built in one will be executed instead
+*/
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000;
@@ -43,7 +61,31 @@ const server = app.listen(
     console.log(`server is running in ${process.env.NODE_ENV} mode on port ${PORT} `)
 );
 
+
+//  TERMINATE THE PROCESS ..
+
 process.on('unhandledRejection', (err, promise) => {
     console.log(`Erorr: ${err.message}`);
     server.close(() => { process.exit(1) })
-})
+});
+
+
+/*ERROR HANDLER
+    **Express’s default error handler will:
+        Set the HTTP Status to 500
+        Sends a text response to the requester
+        Logs the text response in the console
+
+    **If you want to handle an asynchronous error, you need to send the error into an express error handler through the next argument.
+
+    **Express will stop using its default error handler once you create a custom error handler.
+    To handle an error, you need to communicate with the frontend that’s requesting the endpoint. This means you need to:
+
+    Send over a valid HTTP status code
+    Send over a valid response
+
+
+
+
+*/
+
