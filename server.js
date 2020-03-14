@@ -72,7 +72,7 @@ process.on('unhandledRejection', (err, promise) => {
 
 /*ERROR HANDLER
     **Express’s default error handler will:
-        Set the HTTP Status to 500
+        Set the HTTP Status to 500 (internal server)
         Sends a text response to the requester
         Logs the text response in the console
 

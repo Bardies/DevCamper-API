@@ -1,0 +1,12 @@
+error.message = err.message;  >>> ???
+
+why using class??
+
+/* First, we need to throw or create an Error. When we create our error,
+we can define a .message property by passing in a string as a parameter.
+This becomes our err.message, used later. Now we can attach a status code appropriate to the problem.
+We should give Forbidden requests the 403 status code.
+
+The last and most important step is to pass a parameter into next().
+ If next receives an argument,
+ Express will assume there was an error, skip all other routes, and send whatever was passed to any error-handling middleware you have defined.*/
