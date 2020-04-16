@@ -11,7 +11,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        count: bootcamps.length(),
+        count: bootcamps.length,
         data: bootcamps
     })
     // } catch (err) {
@@ -83,7 +83,7 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 
 //@desc          CREATE new bootcamp
 //@route        '/api/v1/bootcamps'
-//@access       private
+//@access        private
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
     //try {
     const bootcamp = await Bootcamp.create(req.body);
@@ -131,6 +131,8 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
         runValidators: true  //apply the validators in schema on the updated data
     })
     if (!bootcamp) {
+        // here we know the error so we set the values of message and status code
+
         return next(
             new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
         )

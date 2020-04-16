@@ -1,7 +1,12 @@
+/*
+    BY USING THIS FUNCTION WE WILL GET RID OF TRY CATCH BLOCK IN THE HANDLERS OF THE ROUTES
+    JUST BY USING PROMISE
+*/
+
 //receives a function and returns a function with three input params
 
 
-/*THIS FUNCTION TAKES (ASYNC FUNCTION )>> WE WANNA DELETE TRY CATCH SO WE WILL EXECUTE THEM I THIS FUNCTION 
+/*THIS FUNCTION TAKES (ASYNC FUNCTION )>> WE WANNA DELETE (TRY CATCH) SO WE WILL EXECUTE THEM I THIS FUNCTION 
  TO APPLY DRY PRINCIPLE (DON'T REPEAT YOURSELF*/
 //WE DON'T USE THWE WORD FUNCTION BECAUSE WE DEFINE "ARROW FUNCTION"
 /*
@@ -14,8 +19,12 @@ FN >> ASYNC FUNCTION (PARAMETER) => EXECUTE A FUNCTION THAT WILL TAKE 3 PARAMS (
 */
 const asyncHandler = fn => (req, res, next) =>
     Promise
-        .resolve(fn(req, res, next))
-        .catch(next)
+        .resolve(fn(req, res, next))            //execute the function passed to asyncHandler >> pass its params to it 
+        .catch(next)                            //sync function >> next 
+
+/*
+    here the error will be passed to the custom error handler 
+*/
 
 
 module.exports = asyncHandler;

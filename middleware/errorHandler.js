@@ -5,13 +5,14 @@ const ErrorRes = require('../utils/error_response')
  instance os tha class has 2 properties message and statusCose*/
 
 const errorHandler = (err, req, res, next) => {
+    //we don't want to make seperate response for each error
     let error = { ...err }      //spread operator (copy of error object)
     //err passed to error handler via next and Error class in Node has message property(error has method message & err.message has value) 
 
-    error.message = err.message;
+    //error.message = err.message;
 
-    console.log(err);             //FOR DEVELOPMENT..
-    console.log(err.name)
+    console.log(error.message);             ///FOR DEVELOPMENT..
+    console.log(error.name)
     //CUSTOMIZE ERROR HANDELING 
     /* ==========BAD ID============== */
     if (err.name === 'CastError') {
@@ -23,9 +24,9 @@ const errorHandler = (err, req, res, next) => {
         const message = "Duplication";
         error = new ErrorRes(message, 400);
     }
-    /*===========EMPTY============== */
+    /*===========ValidationError >> things "required" in the schema of the model don't exist/ be filled ============== */
     if (err.name === "ValidationError") {
-        const message = Object.values(err.errors).map(val => val.message)
+        const message = Object.values(err.errors).map(val => val.message)   //array of errors(err.errors (object))
         error = new ErrorRes(message, 400)
     }
 

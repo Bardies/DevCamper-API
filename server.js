@@ -1,3 +1,4 @@
+//require >> to import the model/library/framework to our code THEN we make instance by express()
 const express = require('express');
 //load env. vars from .env file into process.env(process> global obj., env> prop. returns obj. contains the user environment)
 const dotenv = require('dotenv');
@@ -16,6 +17,7 @@ connect_db()
 
 //LOAD ROUTES
 const bootcamps_router = require('./routes/bootcamps');
+//const courses_router = require('./routes/courses');
 
 //middleware generic to all paths >> '/api/v1/bootcamps'
 /*
@@ -45,6 +47,7 @@ app.use(express.json());
 
 //Routes 
 app.use('/api/v1/bootcamps', bootcamps_router);
+//app.use('/api/v1/courses', courses_router);
 
 /*Order in Middleware is important, linear in execution of middleware
     >> You define error-handling middleware last, after other app.use() and routes calls

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const geocoder = require('../utils/geocoder')
 
 const BootcampSchema = new mongoose.Schema({
     name: {
@@ -40,11 +41,11 @@ const BootcampSchema = new mongoose.Schema({
     location: {
         // GeoJSON Point
         type: {
-            type: String,
+            type: String,  //string
             enum: ['Point']
         },
         coordinates: {
-            type: [Number],
+            type: [Number], //array of numbers
             index: '2dsphere'
         },
         formattedAddress: String,
@@ -104,10 +105,35 @@ const BootcampSchema = new mongoose.Schema({
         toObject: { virtuals: true }
     }
 );
+// ===== USE MONGOOSE MIDDLEWARE (HOOKS) ========
+
+//  GEOCODER TO CRAETE LOCATION FIELD BASED ON THE ADDERSS ENTERED WITH THE BOOTCAMP
+
+BootcampSchema.pre('save', async function (next) {         //async function as it will take time
+    const loc = await geocoder.geocode(this.address)     // its output is an array of single object
+    this.location = {
+        type: 'point',
+        coordinates: [loc[0].longitude, loc[0].latitude],
+        formattedAddress: loc[0].formattedAddress,
+        street: loc[0].street,
+        city: loc[0].city,
+        state: loc[0].state,
+        zipcode: loc[0].zipcode,
+        country: loc[0].country
+    }
+    next();
+})
+
+//don't save addreess (we just use address to extract the location exactly by using geocoder)
+this.address = undefined
+
+
+
+//we don't use arrow function because it handle "this" differentely
 
 BootcampSchema.pre('save', function (next) {
-
-    this.slug = slugify(this.name, { lower: true });           //this here is abootcamp object
+    //this.slug >> refers to "slug" in bootcamp schema
+    this.slug = slugify(this.name, { lower: true });
     next();
 });
 
