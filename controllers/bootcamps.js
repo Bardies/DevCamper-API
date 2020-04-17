@@ -1,13 +1,49 @@
 
 const ErrorRes = require('../utils/error_response')
 const asyncHandler = require('../middleware/async')
+const geocoder = require('../utils/geocoder')
 const Bootcamp = require('../models/Bootcamp')   //model in mongo bd with particular schema
 //@desc         GET all bootcamps
 //@route        '/api/v1/bootcamps'
 //@access       puplic
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
     //try {
-    const bootcamps = await Bootcamp.find();
+    //==== USE FILTERING ====
+    //console.log(req.query)
+    let query;
+
+    //we take a copy to remove select from it and in the same time we want to check if the fields are exist in rq.query or not
+    let reqQuery = { ...req.query }
+
+
+    //delete fields
+    let removeFields = ['select', 'sort']
+    removeFields.forEach(param => delete reqQuery[param])
+    let queryStr = JSON.stringify(reqQuery);
+
+
+    //replace(str|regex, replacement|function) >> function (match, offset, ...) called for each match and return value will be the replacement
+    //REGEX:  g > global (the entire string not the first word we met only)
+    queryStr = queryStr.replace(/\b(in|gt|gte|lt|lte)\b/g, match => `$${match}`);
+    query = Bootcamp.find(JSON.parse(queryStr))                      //find (obj) 
+
+    //chech the fields and do an action on the query that use it to fetch from the DB
+    console.log(`select: ${req.query.select}`)
+    if (req.query.select) {
+        const fields = req.query.select.split(',').join(" ")     // >> ['name', 'description'] >> name description
+        query = query.select(fields)                             // query.select('field1 field2 field3')
+    }
+
+    //sort (split >> returns an "array", join >> returns a "string")
+    console.log(`sort: ${req.query.sort}`);
+    if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(" ")
+        query = query.sort(sortBy)
+    } else {
+        query = query.sort('-createdAt')
+    }
+
+    const bootcamps = await query
 
     res.status(200).json({
         success: true,
@@ -145,6 +181,39 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 
 
 });
+
+//@desc         get bootcamps by radius
+//@route        api/v1/bootcamps/radius/:zipcode/:distance
+//@access       private
+
+exports.getBootcampByRadius = asyncHandler(async (req, res, next) => {
+    const { zipcode, distance } = req.params;
+
+    console.log(zipcode)
+    //get langitude and latitude from geocoder
+    const loc = await geocoder.geocode(zipcode);
+
+    const long = loc[0].longitude;
+    const lat = loc[0].latitude;
+
+    //earth radius in miles is 3963
+    const radius = distance / 3963
+
+    console.log(`radius: ${radius}, long: ${long} and lat: ${lat}`)
+    //Bootcamp.create - Bootcamp.find - Bootcamp.delete () [we apply this methods on the model]
+    // Model >> on which we apply methods, Schema >> pattern of the data
+    const bootcamps = await Bootcamp.find({
+        location: { $geoWithin: { $centerSphere: [[long, lat], radius] } }
+    });
+
+    console.log(`bootcamps: ${bootcamps}`)
+    res.status(200).json({
+        success: true,
+        count: bootcamps.length,
+        data: bootcamps
+    })
+})
+
 
 
 /*

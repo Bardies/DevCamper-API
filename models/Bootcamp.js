@@ -115,14 +115,15 @@ BootcampSchema.pre('save', async function (next) {         //async function as i
         type: 'point',
         coordinates: [loc[0].longitude, loc[0].latitude],
         formattedAddress: loc[0].formattedAddress,
-        street: loc[0].street,
+        street: loc[0].streetName,
         city: loc[0].city,
-        state: loc[0].state,
+        state: loc[0].stateCode,
         zipcode: loc[0].zipcode,
-        country: loc[0].country
+        country: loc[0].countryCode
     }
     next();
 })
+
 
 //don't save addreess (we just use address to extract the location exactly by using geocoder)
 this.address = undefined
