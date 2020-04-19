@@ -18,6 +18,7 @@ const Course = require('./models/Course');
 
 
 // 1- import the data (read json file)
+//JSON.parse >> from json string to js object
 const bootcamps = JSON.parse(fs.readFileSync('./_data/bootcamps.json'));
 const courses = JSON.parse(fs.readFileSync('./_data/courses.json'))
 
@@ -32,7 +33,7 @@ mongoose.connect(process.env.mongoDB_URI, {
 const addData = async () => {
     try {
         await Bootcamp.create(bootcamps);
-        await Course.create(courses);
+        //await Course.create(courses);
         console.log("add is done")
         process.exit();
     } catch (err) {

@@ -21,7 +21,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     removeFields.forEach(param => delete reqQuery[param])
     let queryStr = JSON.stringify(reqQuery);
     //limit, page
-    let limit = parseInt(req.query.limit) || 2;
+    let limit = parseInt(req.query.limit) || 25;
     let page = parseInt(req.query.page) || 1;
     let startIndex = (page - 1) * limit;
     let endIndex = page * limit;
@@ -32,7 +32,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     //replace(str|regex, replacement|function) >> function (match, offset, ...) called for each match and return value will be the replacement
     //REGEX:  g > global (the entire string not the first word we met only)
     queryStr = queryStr.replace(/\b(in|gt|gte|lt|lte)\b/g, match => `$${match}`);
-    query = Bootcamp.find(JSON.parse(queryStr))                      //find (obj) 
+    query = Bootcamp.find(JSON.parse(queryStr)).populate('COURSES')                  //find (obj) 
 
 
     //ADD QUERY HERE CUZ IT DEPENDS ON (PAGE AND LIMIT) AND THEY HAVE DEFAULT VALUES.. NO NEED FOR CONDITIONS/ ANYTHING ELSE
@@ -168,13 +168,15 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
 //@access       private
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
     // try {
-    const removed_bootcamp = await Bootcamp.findByIdAndRemove(req.params.id);
-    if (!bootcamp) {
+
+    const removed_bootcamp = await Bootcamp.findById(req.params.id);
+    if (!removed_bootcamp) {
         //return res.status(400).json({ success: false })
         return next(
             new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
         )
     }
+    removed_bootcamp.remove();
     res.status(200).json({ success: true, deleted: removed_bootcamp })
     // } catch (err) {
     //res.status(400).json({ success: false })

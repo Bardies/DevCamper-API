@@ -5,7 +5,7 @@ const router = express.Router();
 
 
 /* if we're here(api/v1/bootcamps) and find this route >> pass it to courseRouter */
-//router.use('/:bootcampId/courses', coursesRouter)      //rather than inculde get courses handler and make a seperate route to it
+router.use('/:bootcampId/courses', coursesRouter)      //rather than inculde get courses handler and make a seperate route to it
 const {
     getBootcamp,
     getBootcamps,
