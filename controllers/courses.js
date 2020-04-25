@@ -4,30 +4,30 @@ const asyncHandler = require('../middleware/async')
 const Course = require('../models/Course')
 const Bootcamp = require('../models/Course')
 
+
 //@desc      Get courses
 //@route     GET /v1/courses
 //@route     GET /v1/bootcamps/:bootcampId/courses
 //@access    public
 
 exports.getCourses = asyncHandler(async (req, res, next) => {
-    let query;
 
     if (req.params.bootcampId) {
-        query = Course.find({ bootcamp: req.params.bootcampId })
+
+        //Bootcamp courses no need to use pagination or select
+        const courses = await Course.find({ bootcamp: req.params.bootcampId })
+        return res.status(200).json({
+            success: true,
+            count: courses.length,
+            data: courses
+        });
+
     } else {
-        query = Course.find().populate({
-            path: 'bootcamp',                 //field
-            select: 'name description'       //fields to show
-        })
+        res.status(200).json(res.advancedResults)
     }
 
-    const courses = await query;
 
-    res.status(200).json({
-        success: true,
-        count: courses.length,
-        data: courses
-    });
+
 });
 
 
@@ -39,7 +39,7 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
     const course = await Course.findById(req.params.id);
     if (!course) {
         return next(
-            ErrorRes(`No course with id: ${req.params.id}`, 404)
+            new ErrorRes(`No course with id: ${req.params.id}`, 404)
         )
     }
 
