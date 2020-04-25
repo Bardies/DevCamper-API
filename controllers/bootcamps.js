@@ -2,6 +2,7 @@
 const ErrorRes = require('../utils/error_response')
 const asyncHandler = require('../middleware/async')
 const geocoder = require('../utils/geocoder')
+const path = require('path')
 const Bootcamp = require('../models/Bootcamp')   //model in mongo bd with particular schema
 //@desc         GET all bootcamps
 //@route        '/api/v1/bootcamps'
@@ -242,6 +243,78 @@ exports.getBootcampByRadius = asyncHandler(async (req, res, next) => {
         count: bootcamps.length,
         data: bootcamps
     })
+})
+
+//@desc                 upload a bootcamp photo
+//@route                PUT v1/bootcamps/:id/photo
+//@access               Private
+/*
+====================== UPLOAD BOOTCAMP IMAGE ==============================
+
+ *****server.js*******
+    1- require the module express-fileupload
+    2- add the middleware
+ *****CONTROLLER******
+    1- we need to upload photo from our device >> use express-fileupload package
+    2- check bootcamp and req.files 
+    3- check if the file is image - custom name to the image
+    4- store the image on server using "mv func"
+    5- update photo field in the bootcamp document
+******Route**********
+*/
+
+exports.uploadBootcampImage = asyncHandler(async (req, res, next) => {
+    const bootcamp = await Bootcamp.findById(req.params.id)
+    //console.log(req.files)
+    //Chech the bootcamp id
+    if (!bootcamp) {
+        return next(
+            new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
+        )
+    }
+
+    if (!req.files) {
+        return next(
+            new ErrorRes(`please upload a file`, 404)
+        )
+    }
+
+    const file = req.files.file;
+
+    // Make sure the image is a photo
+    if (!file.mimetype.startsWith('image')) {
+        return next(new ErrorRes(`Please upload an image file`, 400));
+    }
+    if (file.size > process.env.MAX_FILE_UPLOAD) {
+        return next(
+            new ErrorResponse(
+                `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+                400
+            )
+        );
+    }
+
+    //  Custom name to prevent override
+    //use path module to extract the image extension from the the name
+    file.name = `photo_${req.params.id}${path.parse(file.name).ext}`
+
+    // Now we have a photo >> use mv func to move it to folder on server then update photo bootcamp
+    file.mv(`${process.env.PUBLIC_UPLOAD_PATH}/${file.name}`, async err => {
+        if (err) {
+            console.log(err);
+            return next(
+                ErrorRes('problem with photo upload', 500)   //server error
+            )
+        }
+        Bootcamp.findByIdAndUpdate(req.params.id, { photo: file.name })
+    })
+
+    res.status(200).json({
+        success: true,
+        data: file.name
+    })
+
+
 })
 
 

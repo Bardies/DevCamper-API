@@ -2,6 +2,9 @@
 const express = require('express');
 //load env. vars from .env file into process.env(process> global obj., env> prop. returns obj. contains the user environment)
 const dotenv = require('dotenv');
+const fileUpload = require('express-fileupload')
+const path = require('path')
+
 const app = express();
 //Middleware for logging in NODEJS
 //const morgan = require('morgan');
@@ -42,8 +45,15 @@ const courses_router = require('./routes/courses');
     app.use(morgan('dev'))
 }*/
 
+
 //ENABLE US TO PARSE THE BODY
 app.use(express.json());
+
+//add static folder
+app.use(express.static(path.join(__dirname, 'public')))
+
+//file uplaod
+app.use(fileUpload());
 
 //Routes 
 app.use('/api/v1/bootcamps', bootcamps_router);
