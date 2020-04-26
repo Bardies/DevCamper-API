@@ -10,6 +10,16 @@ const ErrorRes = require('../utils/error_response')
 //@access           public
 exports.register = asyncHandler(async (req, res, next) => {
 
+    // Create a user with encrypted password
+    const { name, email, password, role } = req.body;
+    //without await success true will be appear even if error exists
+    const user = await User.create({
+        name,
+        email,
+        password,
+        role
+    });
+
     res.status(200).json({
         success: true
     })
