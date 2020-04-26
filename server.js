@@ -4,6 +4,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const fileUpload = require('express-fileupload')
 const path = require('path')
+const cookieParser = require('cookie-parser')
 
 const app = express();
 //Middleware for logging in NODEJS
@@ -50,6 +51,7 @@ const auth_router = require('./routes/auth')
 //ENABLE US TO PARSE THE BODY
 app.use(express.json());
 
+app.use(cookieParser());
 //add static folder
 app.use(express.static(path.join(__dirname, 'public')))
 
