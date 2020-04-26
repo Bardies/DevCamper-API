@@ -97,3 +97,17 @@ const getCookieToken = function (user, statusCode, res) {
         })
 
 }
+
+
+//@desc             get the user via token
+//@route            GET api/v1/auth/me
+//@access           private
+
+exports.getMe = asyncHandler(async (req, res, next) => {
+    console.log(req.user)
+    const user = await User.findById(req.user.id);
+    res.status(200).json({
+        success: true,
+        user
+    })
+})

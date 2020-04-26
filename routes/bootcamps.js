@@ -4,6 +4,7 @@ const coursesRouter = require('./courses')
 const router = express.Router();
 const Bootcamp = require('../models/Bootcamp')
 const Course = require('../models/Course')
+const { protect } = require('../middleware/auth')
 const advancedResults = require('../middleware/advancedResults')
 
 /* if we're here(api/v1/bootcamps) and find this route >> pass it to courseRouter */
@@ -21,16 +22,16 @@ const {
 router
     .route('/')
     .get(advancedResults(Bootcamp, 'COURSES'), getBootcamps)
-    .post(createBootcamp);
+    .post(protect, createBootcamp);
 
 router.route('/:id/photo').put(uploadBootcampImage)
 
 router
     .route('/:id')
     .get(getBootcamp)
-    .post(createBootcamp)
-    .delete(deleteBootcamp)
-    .put(updateBootcamp)
+    .post(protect, createBootcamp)
+    .delete(protect, deleteBootcamp)
+    .put(protect, updateBootcamp)
 
 router.route('/radius/:zipcode/:distance').get(getBootcampByRadius);
 
