@@ -22,7 +22,7 @@ const {
 router
     .route('/')
     .get(advancedResults(Bootcamp, 'COURSES'), getBootcamps)
-    .post(protect, authorizeRole('admin', 'publisher'), createBootcamp);
+    .post(protect, authorizeRole('admin', 'publisher'), createBootcamp);    //['admin', 'publisher'] >> arguments is array
 
 router.route('/:id/photo').put(uploadBootcampImage)
 

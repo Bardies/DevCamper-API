@@ -2,7 +2,7 @@
 const ErrorRes = require('../utils/error_response')
 const asyncHandler = require('../middleware/async')
 const Course = require('../models/Course')
-const Bootcamp = require('../models/Course')
+const Bootcamp = require('../models/Bootcamp')
 
 
 //@desc      Get courses
@@ -57,11 +57,21 @@ exports.getCourse = asyncHandler(async (req, res, next) => {
 
 exports.createCourse = asyncHandler(async (req, res, next) => {
     //add prop in body called bootcamp its value is bootcamp id
-    req.body.bootcamp = req.params.bootcampId
-    const bootcamp = Bootcamp.findById(req.params.bootcampId)
+    req.body.bootcamp = req.params.bootcampId;
+    req.body.user = req.user.id;
+
+    const bootcamp = await Bootcamp.findById(req.params.bootcampId);
+
     if (!bootcamp) {
         return next(
-            ErrorRes(`No bootcamp with id: ${req.params.bootcampId}`)
+            new ErrorRes(`No bootcamp with id: ${req.params.bootcampId}`, 404)
+        )
+    }
+
+    //Chceck if bootcamp owner is the user logged in 
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to add a course to this bootcamp`, 401)
         )
     }
 
@@ -89,6 +99,13 @@ exports.updateCourse = asyncHandler(async (req, res, next) => {
         )
     }
 
+    //Chceck if bootcamp owner is the user logged in 
+    if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to update a course in this bootcamp`, 401)
+        )
+    }
+
     updated_course = await Course.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
         runValidators: true
@@ -113,6 +130,13 @@ exports.deleteCourse = asyncHandler(async (req, res, next) => {
     if (!course) {
         return next(
             ErrorRes(`No course with id: ${req.params.id}`)
+        )
+    }
+
+    //Chceck if bootcamp owner is the user logged in 
+    if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to delete a course in this bootcamp`, 401)
         )
     }
 

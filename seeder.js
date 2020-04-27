@@ -14,6 +14,7 @@ const dotenv = require('dotenv');                   //to connect the db uri (SEP
 dotenv.config({ path: './config/config.env' });
 const Bootcamp = require('./models/Bootcamp');          //load the bootcamp model (schema)
 const Course = require('./models/Course');
+const User = require('./models/User')
 
 
 
@@ -21,6 +22,7 @@ const Course = require('./models/Course');
 //JSON.parse >> from json string to js object
 const bootcamps = JSON.parse(fs.readFileSync('./_data/bootcamps.json'));
 const courses = JSON.parse(fs.readFileSync('./_data/courses.json'))
+const users = JSON.parse(fs.readFileSync('_data/users.json'))
 
 // 2- connect the db (seperate connection cuz it's a seperate file)
 mongoose.connect(process.env.mongoDB_URI, {
@@ -33,7 +35,8 @@ mongoose.connect(process.env.mongoDB_URI, {
 const addData = async () => {
     try {
         await Bootcamp.create(bootcamps);
-        //await Course.create(courses);
+        await Course.create(courses);
+        await User.create(users);
         console.log("add is done")
         process.exit();
     } catch (err) {
@@ -46,6 +49,7 @@ const deleteData = async () => {
     try {
         await Bootcamp.deleteMany();
         await Course.deleteMany();
+        await User.deleteMany();
         console.log("delete is done")
         process.exit();
     } catch (err) {

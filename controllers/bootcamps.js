@@ -19,14 +19,13 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 //@route        '/api/v1/bootcamp/:id'
 //@access       puplic
 exports.getBootcamp = asyncHandler(async (req, res, next) => {
-    //  try {
-    const bootcamp = await Bootcamp.findById(req.params.id);
 
+
+    const bootcamp = await Bootcamp.findById(req.params.id);
     /*if the same format of id but no bootcamp exist with this id the try will be executed with data: null
      HANDLE THIS ERROR BY THE FOLLOWING IF
     */
     if (!bootcamp) {
-        //RETURN TO ENSURE NOT EXECUTING THE RES.STATUS(200) AFTER THIS PART OF CODE
 
         //return res.status(400).json({ success: false })
 
@@ -37,6 +36,7 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
         */
         /* CREATE INSTANCE OF THE CLASS ERRORRES AND SEND MSG, STUTUS CODE TO RUN THE CONSTRUCTOR
                 ####### HOW THIS ERROR WILL APPEAR IN THE RESPONSE ??
+                            - errorHandler
         */
 
         return next(
@@ -77,17 +77,22 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 //@route        '/api/v1/bootcamps'
 //@access        private
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
-    //try {
+    // Add user to req.body ro be associated with the bootcamp
+    req.body.user = req.user.id;                                //req.user >>from protect middleware
+
+    // Publisher >> add only one bootcamp
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
+    if (publishedBootcamp && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.name}, has already published a bootcamp`)
+        )
+    }
     const bootcamp = await Bootcamp.create(req.body);
 
     res.status(201).json({
         success: true,
         data: bootcamp
     })
-
-    //} catch (err) {
-    //    next(err)
-    //}
 
 })
 
@@ -104,14 +109,16 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
             new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
         )
     }
-    removed_bootcamp.remove();
-    res.status(200).json({ success: true, deleted: removed_bootcamp })
-    // } catch (err) {
-    //res.status(400).json({ success: false })
-    //    next(err)
-    //}
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to delete this bootcamp`, 401)
+        )
+    }
 
-    //res.status(200).json({ success: true, msg: `delete the bootcamp its id is ${req.params.id}` });
+    removed_bootcamp.remove();
+
+    res.status(200).json({ success: true, deleted: {} })
+
 })
 
 
@@ -119,23 +126,26 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
 //@route        '/api/v1/bootcamps/:id'
 //@access       private
 exports.updateBootcamp = asyncHandler(async (req, res, next) => {
-    //  try {
-    const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,    //return the updated bootcamp in bootcamp var.
-        runValidators: true  //apply the validators in schema on the updated data
-    })
+
+    let bootcamp = await Bootcamp.findById(req.params.id)
     if (!bootcamp) {
-        // here we know the error so we set the values of message and status code
 
         return next(
             new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
         )
     }
+
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to update this bootcamp`, 401)
+        )
+    }
+    bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,                                                          //return the updated bootcamp in bootcamp var.
+        runValidators: true                                                 //apply the validators in schema on the updated data
+    })
     res.status(200).json({ success: true, updated_data: bootcamp });
-    //  } catch (err) {
-    //res.status(400).json({ success: false })
-    //     next(err)
-    //}
+
 
 
 });
@@ -197,6 +207,12 @@ exports.uploadBootcampImage = asyncHandler(async (req, res, next) => {
     if (!bootcamp) {
         return next(
             new ErrorRes(`there is no bootcamp with id = ${req.params.id}`, 404)
+        )
+    }
+
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(
+            new ErrorRes(`the user with id: ${req.user.id} unauthorized to update this bootcamp`, 401)
         )
     }
 

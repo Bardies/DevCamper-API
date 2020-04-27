@@ -45,7 +45,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
     user logged in >> token >> hit the route >> protect executed(req.user) >> authorize role
     authorize role(take roles) if the role of logged in user in roles >> next()>> complete the route handler execution
 */
-exports.authorizeRole = (...roles) => {
+
+/*
+    we passed 2 arguments (admin, publisher) >> so we need to use 2 params in the function defention to recaive these values 
+    and to be able to use then in the body
+    but we may change the args passed (e.g. we want the admin only to create bootcamps) now the number of args are changed >> PROBLEM!!!
+    THE SOLUTION IN using rest operator (will collect params into array)
+*/
+exports.authorizeRole = (...roles) => {    //roles now are array
     return (req, res, next) => {
         //we here access req.user >> so we need first to implement "protect" middleware
         if (!roles.includes(req.user.role)) {
