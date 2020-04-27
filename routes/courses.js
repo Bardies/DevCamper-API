@@ -1,7 +1,7 @@
 const express = require("express")
 const advancedResults = require('../middleware/advancedResults')
 const Course = require('../models/Course')
-const { protect } = require('../middleware/auth')
+const { protect, authorizeRole } = require('../middleware/auth')
 
 
 // to use request parameters of the bootcamp router in handler of this route that exist in another router
@@ -15,12 +15,12 @@ router
         path: 'bootcamp',                 //field
         select: 'name description'       //fields to show
     }), getCourses)
-    .post(protect, createCourse)
+    .post(protect, authorizeRole('admin', 'publisher'), createCourse)
 router
     .route('/:id')
     .get(getCourse)
-    .delete(protect, deleteCourse)
-    .put(protect, updateCourse)
+    .delete(protect, authorizeRole('admin', 'publisher'), deleteCourse)
+    .put(protect, authorizeRole('admin', 'publisher'), updateCourse)
 
 
 module.exports = router
