@@ -110,4 +110,35 @@ exports.getMe = asyncHandler(async (req, res, next) => {
         success: true,
         user
     })
+});
+
+
+//@desc             Forgot password
+//@route            GET api/v1/auth/forgotpassword
+//@access           Public
+
+/*
+    1- find the user with email sent in the body
+*/
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+        return next(
+            new ErrorRes('No user with that email', 404)
+        )
+    }
+
+    const token = user.getResetPasswordToken();
+
+    // now we need to save the user we just set the field but we don't create or save the document
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+        success: true,
+        token,
+        user
+    })
 })

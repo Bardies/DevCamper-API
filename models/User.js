@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 const userSchema = mongoose.Schema({
     name: {
@@ -38,8 +39,10 @@ const userSchema = mongoose.Schema({
 
 //Encrypt password
 userSchema.pre('save', async function (next) {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt)
+    if (this.password) {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt)
+    }
 });
 
 //generate token
@@ -52,6 +55,30 @@ userSchema.methods.getToken = function () {
 // to compare password entered by a found user(email is found in db) with hashed password in db 
 userSchema.methods.checkPassword = async function (entered_password) {
     return await bcrypt.compare(entered_password, this.password)         // returns true or false(plain text password, encrypted password)
+
+}
+
+// Reset password token
+userSchema.methods.getResetPasswordToken = function () {
+    /*
+        1- generate the token (random bytes), BYCRPT >> just hash not generate 
+        2- hash the token and set (resetPasswordToken)
+        3- set (resetPasswordExpire)
+
+     */
+    // give a buffer so we used toString, bytes >> 'hex'
+    const reset_token = crypto.randomBytes(20).toString('hex');
+    //apply on actual user (in the route forgot password) so we ca access this user
+    this.resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(reset_token)
+        .digest('hex')  //digest determint the data format
+
+    // Reset the expire (10 minutes)
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000
+
+    return reset_token
+
 
 }
 

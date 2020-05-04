@@ -71,8 +71,8 @@ CourseSchema.statics.avgCost = async function (bootcampId) {
 }
 
 CourseSchema.post('save', function () {
-    console.log(`this refers to: ${this}`);         //object of the document
-    console.log(`this.constructor: ${this.constructor}`);
+    //console.log(`this refers to: ${this}`);         //object of the document
+    //console.log(`this.constructor: ${this.constructor}`);
     this.constructor.avgCost(this.bootcamp)         //this refers to bootcamp
 });
 

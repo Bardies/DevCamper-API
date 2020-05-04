@@ -76,7 +76,7 @@ exports.createCourse = asyncHandler(async (req, res, next) => {
     }
 
     // body sent to server as a JSON obj
-    const course = Course.create(req.body)   //but the body doen't take bootcamp id so we will assign it manually
+    const course = await Course.create(req.body)   //but the body doen't take bootcamp id so we will assign it manually
     res.status(200).json({
         success: true,
         data: course,
