@@ -51,7 +51,9 @@ const auth_router = require('./routes/auth')
 //ENABLE US TO PARSE THE BODY
 app.use(express.json());
 
+// we use it to access the cookie header
 app.use(cookieParser());
+
 //add static folder
 app.use(express.static(path.join(__dirname, 'public')))
 

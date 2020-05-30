@@ -19,7 +19,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
     if (!token) {
         return next(
-            new ErrorRes('Not authorized to access this route', 401)
+            new ErrorRes('No token', 401)
         )
     }
 
@@ -53,7 +53,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
     THE SOLUTION IN using rest operator (will collect params into array)
 */
 exports.authorizeRole = (...roles) => {    //roles now are array
-    return (req, res, next) => {
+    return (req, res, next) => {                // return true or false
         //we here access req.user >> so we need first to implement "protect" middleware
         if (!roles.includes(req.user.role)) {
             return next(

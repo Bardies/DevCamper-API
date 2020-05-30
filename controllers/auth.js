@@ -1,7 +1,8 @@
 const User = require('../models/User');
 const asyncHandler = require('../middleware/async')
 const ErrorRes = require('../utils/error_response')
-
+const sendEmail = require('../utils/sendEmail')
+const crypto = require('crypto')
 
 
 
@@ -47,6 +48,8 @@ exports.login = asyncHandler(async (req, res, next) => {
     /*in schema password (select: false) because we don't want password to appear to users we we as example select users of bootcamps
     so user document that match the email won't include the password but we need this password to chech user login 
     so we use .select('+password) > which means, include the password that is supposed to be excluded
+        + >> means include
+        - >> means exclude
     */
     const user = await User.findOne({ email }).select('+password');
     // console.log(user)
@@ -113,12 +116,85 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 });
 
 
+//@desc             update the logged in user password
+//@route            PUT api/v1/auth/updatePassword
+//@access           private
+
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+
+    const user = await User.findById(req.user.id).select('+password')
+    if (!(user.checkPassword(req.body.currentPassword))) {
+        return next(new ErrorRes('incorrect password'), 401)
+    }
+    user.password = req.body.newPassword;
+    await user.save()
+
+    getCookieToken(user, 200, res);    //to keep user logged in
+
+});
+
+//@desc             update email and name for user 
+//@route            PUT api/v1/auth/updateDetails
+//@access           private
+
+exports.updateDetails = asyncHandler(async (req, res, next) => {
+    toUpdate = {
+        name: req.body.name,
+        email: req.body.email
+    }
+    const user = await User.findByIdAndUpdate(req.user.id, toUpdate, {
+        new: true,
+        runValidators: true
+    });
+    res.status(200).json({
+        success: true,
+        user
+    })
+});
+
+//@desc             reset the password
+//@route            PUT api/v1/auth/resetPassword/:token
+//@access           private
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+
+    resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(req.params.token)
+        .digest('hex')
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+
+    });
+    if (!user) {
+        return next(new ErrorRes('Invalid token', 400))
+    }
+
+    user.password = req.body.password  // before save salt will be generated and hashed password will be saved
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+
+    await user.save();
+
+    // we want user to be logged in automatically after reset the password successfully
+    getCookieToken(user, 200, res);
+
+
+});
+
+
 //@desc             Forgot password
 //@route            GET api/v1/auth/forgotpassword
 //@access           Public
 
 /*
     1- find the user with email sent in the body
+    2- generate password token and expiration date => set this fields in the db
+    3- save the user => to save the fields we added recently
+    4- send the response to the user with the hashed token saved in the document.
+    4- send email with the url that user will visit to reset the password
+
 */
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
@@ -136,9 +212,30 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     // now we need to save the user we just set the field but we don't create or save the document
     await user.save({ validateBeforeSave: false });
 
-    res.status(200).json({
-        success: true,
-        token,
-        user
-    })
+    // send the email with the reset url
+    console.log(req.hostname);
+    const reset_url = `${req.protocol}://${req.hostname}/api/v1/auth/resetPassword/${token}`;
+    const msg = `click on this url to reset password ${reset_url}`
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "Reset Password",
+            text: msg
+        })
+
+        res.status(200).json({
+            success: true,
+            data: 'email sent'
+        })
+    } catch (err) {
+        console.log(err)
+        user.resetPasswordToken = undefined
+        user.resetPasswordExpire = undefined
+        await user.save({ validateBeforeSave: false });
+
+        return next(new ErrorRes('email could not be sent', 500))   //server error
+    }
+
+
 })

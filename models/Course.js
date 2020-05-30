@@ -70,6 +70,8 @@ CourseSchema.statics.avgCost = async function (bootcampId) {
     }
 }
 
+// ============== MIDDLEWARES IN MONGOOSE (HOOKS) =========================
+
 CourseSchema.post('save', function () {
     //console.log(`this refers to: ${this}`);         //object of the document
     //console.log(`this.constructor: ${this.constructor}`);
@@ -79,7 +81,8 @@ CourseSchema.post('save', function () {
 CourseSchema.pre('remove', function () {
     this.constructor.avgCost(this.bootcamp)
 });
-//===========================================================================================
+
+//==========================================================================
 
 
 

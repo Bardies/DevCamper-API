@@ -39,10 +39,15 @@ const userSchema = mongoose.Schema({
 
 //Encrypt password
 userSchema.pre('save', async function (next) {
-    if (this.password) {
+    // here this is a copy of the new document we want to save in th DB.
+    if (this.isModified('password')) {    //check the current password anf the one in DB.
+        //console.log('not modified password')
+        //next();
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt)
     }
+
+
 });
 
 //generate token
@@ -64,6 +69,7 @@ userSchema.methods.getResetPasswordToken = function () {
         1- generate the token (random bytes), BYCRPT >> just hash not generate 
         2- hash the token and set (resetPasswordToken)
         3- set (resetPasswordExpire)
+        4- return the unhashed token
 
      */
     // give a buffer so we used toString, bytes >> 'hex'
@@ -71,8 +77,8 @@ userSchema.methods.getResetPasswordToken = function () {
     //apply on actual user (in the route forgot password) so we ca access this user
     this.resetPasswordToken = crypto
         .createHash('sha256')
-        .update(reset_token)
-        .digest('hex')  //digest determint the data format
+        .update(reset_token)                    //apply the hash algorithm on eset_token
+        .digest('hex')                          //digest determine the data format
 
     // Reset the expire (10 minutes)
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000
@@ -83,3 +89,6 @@ userSchema.methods.getResetPasswordToken = function () {
 }
 
 module.exports = mongoose.model('User', userSchema)
+
+//If the current middleware function does not end the request-response cycle,
+// it must call next() to pass control to the next middleware function.
