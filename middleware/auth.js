@@ -15,6 +15,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+        console.log(token)
+    }
+
+    else if (req.cookies.Token) {
+        token = req.cookies.Token;
     }
 
     if (!token) {
@@ -22,6 +27,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
             new ErrorRes('No token', 401)
         )
     }
+
 
     // get the user with id exist in the token and set (req.user = user) >> TO ACCESS USER IN OTHER ROUTES in case of having authorization header
     try {
