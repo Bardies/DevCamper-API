@@ -15,7 +15,7 @@ dotenv.config({ path: './config/config.env' });
 const Bootcamp = require('./models/Bootcamp');          //load the bootcamp model (schema)
 const Course = require('./models/Course');
 const User = require('./models/User')
-
+const Review = require('./models/Review')
 
 
 // 1- import the data (read json file)
@@ -23,6 +23,7 @@ const User = require('./models/User')
 const bootcamps = JSON.parse(fs.readFileSync('./_data/bootcamps.json'));
 const courses = JSON.parse(fs.readFileSync('./_data/courses.json'))
 const users = JSON.parse(fs.readFileSync('_data/users.json'))
+const reviews = JSON.parse(fs.readFileSync('./_data/reviews.json'))
 
 // 2- connect the db (seperate connection cuz it's a seperate file)
 mongoose.connect(process.env.mongoDB_URI, {
@@ -37,6 +38,7 @@ const addData = async () => {
         await Bootcamp.create(bootcamps);
         await Course.create(courses);
         await User.create(users);
+        await Review.create(reviews)
         console.log("add is done")
         process.exit();
     } catch (err) {
@@ -50,6 +52,7 @@ const deleteData = async () => {
         await Bootcamp.deleteMany();
         await Course.deleteMany();
         await User.deleteMany();
+        await Review.deleteMany();
         console.log("delete is done")
         process.exit();
     } catch (err) {
