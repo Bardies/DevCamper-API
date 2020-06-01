@@ -22,7 +22,7 @@ const errorHandler = (err, req, res, next) => {
     //CUSTOMIZE ERROR HANDELING 
     /* ==========BAD ID============== */
     if (err.name === 'CastError') {
-        const message = `there is no resource with id = ${err.value}`  //middleware (between request and response so we can see req.params)
+        const message = `Resource Not Found`  //middleware (between request and response so we can see req.params)
         error = new ErrorRes(message, 404);
     }
     /* ==========DUPLICATION=============== */

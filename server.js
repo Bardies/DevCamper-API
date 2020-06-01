@@ -5,7 +5,12 @@ const dotenv = require('dotenv');
 const fileUpload = require('express-fileupload')
 const path = require('path')
 const cookieParser = require('cookie-parser')
-
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const cors = require('cors')
+const xss = require('xss-clean');
+const hpp = require('hpp')
+const rateLimit = require('express-rate-limit')
 const app = express();
 //Middleware for logging in NODEJS
 //const morgan = require('morgan');
@@ -53,8 +58,32 @@ const review_router = require('./routes/reviews')
 //ENABLE US TO PARSE THE BODY
 app.use(express.json());
 
-// we use it to access the cookie header
+// we use it to access the cookie header (Express middleware)
 app.use(cookieParser());
+
+// Add sanitization 
+app.use(mongoSanitize());
+
+// Helmet helps you secure your Express apps by setting various HTTP headers
+app.use(helmet())
+
+// Add xss-clean to prevent xss and sanitize user input
+app.use(xss())
+
+// add limiter
+const limiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 15 minutes
+    max: 100                  // limit each IP to 100 requests per windowMs
+});
+
+//  apply to all requests
+app.use(limiter);
+
+// enable cors
+app.use(cors())
+
+// Add hpp
+app.use(hpp());
 
 //add static folder
 app.use(express.static(path.join(__dirname, 'public')))

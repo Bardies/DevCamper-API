@@ -12,16 +12,17 @@ const ErrorRes = require('../utils/error_response')
 // Routes that need private access >> require login >> Authorization header so we create protect to check that
 
 exports.protect = asyncHandler(async (req, res, next) => {
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        // Set token from Bearer token in header
-        token = req.headers.authorization.split(' ')[1];
-        // Set token from cookie
-    }
-
-    else if (req.cookies.Token) {
+    /* if (
+         req.headers.authorization &&
+         req.headers.authorization.startsWith('Bearer')
+ 
+     ) {
+         // Set token from Bearer token in header
+         token = req.headers.authorization.split(' ')[1];
+         console.log(`token in header: ${token}`)
+     }
+ */
+    if (req.cookies.Token) {
         token = req.cookies.Token;
     }
 
@@ -31,11 +32,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
         )
     }
 
+    console.log(`token in cookie: ${token}`)
 
     // get the user with id exist in the token and set (req.user = user) >> TO ACCESS USER IN OTHER ROUTES in case of having authorization header
     try {
         const decoded = jwt.verify(token, process.env.Secret)  //(id, iat, exp)
-        //console.log(decoded)
+        console.log(`id: ${decoded.id}`)
 
         req.user = await User.findById(decoded.id)
 
