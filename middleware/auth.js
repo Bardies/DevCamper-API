@@ -12,10 +12,13 @@ const ErrorRes = require('../utils/error_response')
 // Routes that need private access >> require login >> Authorization header so we create protect to check that
 
 exports.protect = asyncHandler(async (req, res, next) => {
-    let token;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+    ) {
+        // Set token from Bearer token in header
         token = req.headers.authorization.split(' ')[1];
-        console.log(token)
+        // Set token from cookie
     }
 
     else if (req.cookies.Token) {
@@ -35,6 +38,8 @@ exports.protect = asyncHandler(async (req, res, next) => {
         //console.log(decoded)
 
         req.user = await User.findById(decoded.id)
+
+        console.log(`req.user: ${req.user}`)
         next();
     } catch (err) {
         return next(
@@ -59,7 +64,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
     THE SOLUTION IN using rest operator (will collect params into array)
 */
 exports.authorizeRole = (...roles) => {    //roles now are array
-    return (req, res, next) => {                // return true or false
+
+    return (req, res, next) => {
+        console.log(`req.user: ${req.user}`)             // return true or false
         //we here access req.user >> so we need first to implement "protect" middleware
         if (!roles.includes(req.user.role)) {
             return next(
