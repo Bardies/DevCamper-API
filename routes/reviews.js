@@ -7,12 +7,12 @@ const { getReviews, getReview, addReview, updateReview, deleteReview } = require
 const router = express.Router({ mergeParams: true });
 router.route('/')
     .get(advancedResults(Review), getReviews)
-//.post(protect, authorizeRole('user', 'admin'), addReview)
+    .post(protect, authorizeRole('user', 'admin'), addReview)
 
 router.route('/:id')
     .get(getReview)
-// .put(protect, authorizeRole('admin', 'user'), updateReview)
-// .delete(protect, authorizeRole('admin', 'user'), deleteReview)
+    .put(protect, authorizeRole('admin', 'user'), updateReview)
+    .delete(protect, authorizeRole('admin', 'user'), deleteReview)
 
 
 module.exports = router

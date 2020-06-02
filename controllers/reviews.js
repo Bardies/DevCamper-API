@@ -50,7 +50,7 @@ exports.getReview = asyncHandler(async (req, res, next) => {
 });
 
 //@desc      Add review to a bootcamp
-//@route     POST /api/v1/bootcamps/:bootcampId
+//@route     POST /api/v1/bootcamps/:bootcampId/reviews
 //@access    private(admin - users)
 
 exports.addReview = asyncHandler(async (req, res, next) => {
