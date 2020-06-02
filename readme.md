@@ -20,4 +20,8 @@ npm run dev
 #Run in production mode
 npm start
 ```
+## Deployed API:
+```
+ https://backend-api-v1.herokuapp.com/
+```
 - Version: 1.0.0
